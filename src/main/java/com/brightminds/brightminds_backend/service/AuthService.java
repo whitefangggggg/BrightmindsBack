@@ -13,6 +13,18 @@ public class AuthService {
 
     // Register a new user
     public User register(User user) {
+        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
+            throw new RuntimeException("First name is required");
+        }
+        if (user.getLastName() == null || user.getLastName().trim().isEmpty()) {
+            throw new RuntimeException("Last name is required");
+        }
+        if (user.getPassword() == null || user.getPassword().length() < 6) {
+            throw new RuntimeException("Password must be at least 6 characters long");
+        }
+        if (user.getRole() == null || !(user.getRole().equalsIgnoreCase("TEACHER") || user.getRole().equalsIgnoreCase("STUDENT"))) {
+            throw new RuntimeException("Role must be either 'TEACHER' or 'STUDENT'");
+        }
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("User with email " + user.getEmail() + " already exists");
         }
