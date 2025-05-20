@@ -3,6 +3,7 @@ package com.brightminds.brightminds_backend.service;
 import com.brightminds.brightminds_backend.model.User;
 import com.brightminds.brightminds_backend.repository.UserRepository;
 import com.brightminds.brightminds_backend.util.JwtUtil;
+import com.brightminds.brightminds_backend.dto.RegisterRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,22 +17,28 @@ public class AuthService {
     private JwtUtil jwtUtil;
 
     // Register a new user
-    public User register(User user) {
-        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
+    public User register(RegisterRequestDto registerRequest) {
+        if (registerRequest.getFirstName() == null || registerRequest.getFirstName().trim().isEmpty()) {
             throw new RuntimeException("First name is required");
         }
-        if (user.getLastName() == null || user.getLastName().trim().isEmpty()) {
+        if (registerRequest.getLastName() == null || registerRequest.getLastName().trim().isEmpty()) {
             throw new RuntimeException("Last name is required");
         }
-        if (user.getPassword() == null || user.getPassword().length() < 6) {
+        if (registerRequest.getPassword() == null || registerRequest.getPassword().length() < 6) {
             throw new RuntimeException("Password must be at least 6 characters long");
         }
-        if (user.getRole() == null || !(user.getRole().equalsIgnoreCase("TEACHER") || user.getRole().equalsIgnoreCase("STUDENT"))) {
+        if (registerRequest.getRole() == null || !(registerRequest.getRole().equalsIgnoreCase("TEACHER") || registerRequest.getRole().equalsIgnoreCase("STUDENT"))) {
             throw new RuntimeException("Role must be either 'TEACHER' or 'STUDENT'");
         }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("User with email " + user.getEmail() + " already exists");
+        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+            throw new RuntimeException("User with email " + registerRequest.getEmail() + " already exists");
         }
+        User user = new User();
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(registerRequest.getPassword());
+        user.setRole(registerRequest.getRole());
+        user.setFirstName(registerRequest.getFirstName());
+        user.setLastName(registerRequest.getLastName());
         return userRepository.save(user);
     }
 

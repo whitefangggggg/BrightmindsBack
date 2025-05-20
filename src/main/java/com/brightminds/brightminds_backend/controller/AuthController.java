@@ -2,6 +2,8 @@ package com.brightminds.brightminds_backend.controller;
 
 import com.brightminds.brightminds_backend.model.User;
 import com.brightminds.brightminds_backend.service.AuthService;
+import com.brightminds.brightminds_backend.dto.LoginRequestDto;
+import com.brightminds.brightminds_backend.dto.RegisterRequestDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,10 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
-        logger.info("Registering user with email: {}", user.getEmail());
+    public ResponseEntity<User> register(@RequestBody RegisterRequestDto registerRequest) {
+        logger.info("Registering user with email: {}", registerRequest.getEmail());
         try {
-            User registeredUser = authService.register(user);
+            User registeredUser = authService.register(registerRequest);
             return ResponseEntity.ok(registeredUser);
         } catch (Exception e) {
             logger.error("Error registering user: {}", e.getMessage());
@@ -30,10 +32,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
-        logger.info("Logging in user with email: {}", user.getEmail());
+    public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
+        logger.info("Logging in user with email: {}", loginRequest.getEmail());
         try {
-            var loginResponse = authService.login(user.getEmail(), user.getPassword());
+            var loginResponse = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
             return ResponseEntity.ok(loginResponse);
         } catch (Exception e) {
             logger.error("Error logging in user: {}", e.getMessage());
