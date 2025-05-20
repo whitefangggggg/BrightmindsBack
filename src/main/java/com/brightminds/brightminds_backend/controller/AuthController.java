@@ -4,6 +4,7 @@ import com.brightminds.brightminds_backend.model.User;
 import com.brightminds.brightminds_backend.service.AuthService;
 import com.brightminds.brightminds_backend.dto.LoginRequestDto;
 import com.brightminds.brightminds_backend.dto.RegisterRequestDto;
+import com.brightminds.brightminds_backend.exception.AuthException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,10 @@ public class AuthController {
             logger.error("Error logging in user: {}", e.getMessage());
             return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<String> handleAuthException(AuthException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 }

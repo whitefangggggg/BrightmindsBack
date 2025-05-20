@@ -4,6 +4,7 @@ import com.brightminds.brightminds_backend.model.User;
 import com.brightminds.brightminds_backend.repository.UserRepository;
 import com.brightminds.brightminds_backend.util.JwtUtil;
 import com.brightminds.brightminds_backend.dto.RegisterRequestDto;
+import com.brightminds.brightminds_backend.exception.AuthException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,19 +20,19 @@ public class AuthService {
     // Register a new user
     public User register(RegisterRequestDto registerRequest) {
         if (registerRequest.getFirstName() == null || registerRequest.getFirstName().trim().isEmpty()) {
-            throw new RuntimeException("First name is required");
+            throw new AuthException("First name is required");
         }
         if (registerRequest.getLastName() == null || registerRequest.getLastName().trim().isEmpty()) {
-            throw new RuntimeException("Last name is required");
+            throw new AuthException("Last name is required");
         }
         if (registerRequest.getPassword() == null || registerRequest.getPassword().length() < 6) {
-            throw new RuntimeException("Password must be at least 6 characters long");
+            throw new AuthException("Password must be at least 6 characters long");
         }
         if (registerRequest.getRole() == null || !(registerRequest.getRole().equalsIgnoreCase("TEACHER") || registerRequest.getRole().equalsIgnoreCase("STUDENT"))) {
-            throw new RuntimeException("Role must be either 'TEACHER' or 'STUDENT'");
+            throw new AuthException("Role must be either 'TEACHER' or 'STUDENT'");
         }
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new RuntimeException("User with email " + registerRequest.getEmail() + " already exists");
+            throw new AuthException("User with email " + registerRequest.getEmail() + " already exists");
         }
         User user = new User();
         user.setEmail(registerRequest.getEmail());
@@ -45,9 +46,9 @@ public class AuthService {
     // Login a user and return token
     public LoginResponse login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                .orElseThrow(() -> new AuthException("User not found with email: " + email));
         if (!user.getPassword().equals(password)) {
-            throw new RuntimeException("Invalid password");
+            throw new AuthException("Invalid password");
         }
         String token = jwtUtil.generateToken(user.getEmail());
         return new LoginResponse(token, user);
