@@ -30,11 +30,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
         logger.info("Logging in user with email: {}", user.getEmail());
         try {
-            User loggedInUser = authService.login(user.getEmail(), user.getPassword());
-            return ResponseEntity.ok(loggedInUser);
+            var loginResponse = authService.login(user.getEmail(), user.getPassword());
+            return ResponseEntity.ok(loginResponse);
         } catch (Exception e) {
             logger.error("Error logging in user: {}", e.getMessage());
             return ResponseEntity.badRequest().body(null);
