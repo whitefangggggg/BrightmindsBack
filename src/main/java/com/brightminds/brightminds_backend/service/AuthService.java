@@ -6,6 +6,7 @@ import com.brightminds.brightminds_backend.util.JwtUtil;
 import com.brightminds.brightminds_backend.dto.RegisterRequestDto;
 import com.brightminds.brightminds_backend.exception.AuthException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +17,9 @@ public class AuthService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Value("${teacher.code}")
+    private String teacherCode;
 
     // Register a new user
     public User register(RegisterRequestDto registerRequest) {
@@ -30,6 +34,11 @@ public class AuthService {
         }
         if (registerRequest.getRole() == null || !(registerRequest.getRole().equalsIgnoreCase("TEACHER") || registerRequest.getRole().equalsIgnoreCase("STUDENT"))) {
             throw new AuthException("Role must be either 'TEACHER' or 'STUDENT'");
+        }
+        if (registerRequest.getRole().equalsIgnoreCase("TEACHER")) {
+            if (registerRequest.getTeacherCode() == null || !registerRequest.getTeacherCode().equals(teacherCode)) {
+                throw new AuthException("Invalid or missing teacher code");
+            }
         }
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new AuthException("User with email " + registerRequest.getEmail() + " already exists");

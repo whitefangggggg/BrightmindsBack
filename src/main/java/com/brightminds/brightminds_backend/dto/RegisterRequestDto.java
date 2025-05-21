@@ -6,6 +6,7 @@ public class RegisterRequestDto {
     private String role;
     private String firstName;
     private String lastName;
+    private String teacherCode;
 
     public String getEmail() {
         return email;
@@ -45,5 +46,13 @@ public class RegisterRequestDto {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getTeacherCode() {
+        return teacherCode;
+    }
+
+    public void setTeacherCode(String teacherCode) {
+        this.teacherCode = teacherCode;
     }
 }
