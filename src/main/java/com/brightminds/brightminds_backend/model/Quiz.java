@@ -20,6 +20,8 @@ public class Quiz {
     @Column(nullable = false)
     private String topic;       // e.g., "Mga Bayani ng Pilipinas"
 
+    private String image; // URL or path to quiz image (optional)
+
     @NotNull(message = "Questions cannot be null")
     @Valid // Enable cascading validation
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

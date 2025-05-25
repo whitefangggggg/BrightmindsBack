@@ -18,6 +18,8 @@ public class MatchSortQuestion {
     @Column(nullable = false)
     private String prompt; // e.g., "Match the pairs" or "Sort the steps"
 
+    private String image; // URL or path to question image (optional)
+
     @ElementCollection
     @CollectionTable(name = "match_sort_pairs", joinColumns = @JoinColumn(name = "question_id"))
     private List<Pair> pairs; // For matching: list of pairs; for sorting: list with correct order

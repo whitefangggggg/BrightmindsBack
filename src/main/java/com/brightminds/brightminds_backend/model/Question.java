@@ -20,6 +20,8 @@ public class Question {
     @Column(nullable = false)
     private String text;        // e.g., "Sino ang sumulat ng 'Noli Me Tangere'?"
 
+    private String image; // URL or path to question image (optional)
+
     @NotNull(message = "Options cannot be null")
     @Size(min = 2, message = "At least 2 options are required")
     @ElementCollection
