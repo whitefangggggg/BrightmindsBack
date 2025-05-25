@@ -22,6 +22,10 @@ public class MatchSortQuestion {
 
     @ElementCollection
     @CollectionTable(name = "match_sort_pairs", joinColumns = @JoinColumn(name = "question_id"))
+    @AttributeOverrides({
+        @AttributeOverride(name = "left", column = @Column(name = "pair_left")),
+        @AttributeOverride(name = "right", column = @Column(name = "pair_right"))
+    })
     private List<Pair> pairs; // For matching: list of pairs; for sorting: list with correct order
 
     @NotBlank(message = "Type cannot be blank")
