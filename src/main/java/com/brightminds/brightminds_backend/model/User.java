@@ -23,4 +23,7 @@ public abstract class User {
 
     @Column(nullable = false)
     private String lastName;
+
+    @Column(nullable = false)
+    private String role; // e.g., "TEACHER" or "STUDENT"
 }
