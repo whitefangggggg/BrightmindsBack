@@ -41,6 +41,6 @@ public class Classroom {
     // Optionally, you can add a leaderboard field or method to compute it
 
     public void generateJoinCode() {
-        this.joinCode = java.util.UUID.randomUUID().toString().substring(0, 8);
+        this.joinCode = java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 }
