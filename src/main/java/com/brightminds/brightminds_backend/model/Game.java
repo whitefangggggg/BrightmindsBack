@@ -2,6 +2,7 @@ package com.brightminds.brightminds_backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import jakarta.persistence.Lob;
 
 @Entity
 @Table(name = "games")
@@ -22,4 +23,10 @@ public class Game {
     @ManyToOne
     @JoinColumn(name = "created_by")
     private Teacher createdBy;
+
+    @Enumerated(EnumType.STRING)
+    private GameMode gameMode;
+
+    @Lob
+    private String gameData; // JSON or other format for game-specific data
 } 
