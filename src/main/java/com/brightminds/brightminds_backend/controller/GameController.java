@@ -63,10 +63,5 @@ public class GameController {
             .toList();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Game> getGameById(@PathVariable Long id) {
-        return gameRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
+
 } 
