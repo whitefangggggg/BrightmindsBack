@@ -31,7 +31,6 @@ public class AuthService {
     @Value("${teacher.code}")
     private String teacherCode;
 
-    // Register a new user
     public User register(RegisterRequestDto registerRequest) {
         if (registerRequest.getFirstName() == null || registerRequest.getFirstName().trim().isEmpty()) {
             throw new AuthException("First name is required");
@@ -53,13 +52,17 @@ public class AuthService {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new AuthException("User with email " + registerRequest.getEmail() + " already exists");
         }
+
         User user;
-        if (registerRequest.getRole().equalsIgnoreCase("TEACHER")) {
+        String roleFromRequest = registerRequest.getRole().toUpperCase();
+
+        if (roleFromRequest.equals("TEACHER")) {
             Teacher teacher = new Teacher();
             teacher.setEmail(registerRequest.getEmail());
             teacher.setPassword(registerRequest.getPassword());
             teacher.setFirstName(registerRequest.getFirstName());
             teacher.setLastName(registerRequest.getLastName());
+            teacher.setRole(roleFromRequest);
             user = teacherRepository.save(teacher);
         } else {
             Student student = new Student();
@@ -67,12 +70,12 @@ public class AuthService {
             student.setPassword(registerRequest.getPassword());
             student.setFirstName(registerRequest.getFirstName());
             student.setLastName(registerRequest.getLastName());
+            student.setRole(roleFromRequest);
             user = studentRepository.save(student);
         }
         return user;
     }
 
-    // Login a user and return token
     public LoginResponse login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("User not found with email: " + email));
