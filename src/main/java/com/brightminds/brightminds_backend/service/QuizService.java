@@ -24,7 +24,10 @@ public class QuizService {
     private QuizSubmissionRepository quizSubmissionRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private TeacherRepository teacherRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
 
     @Autowired
     private ProgressRepository progressRepository; // For saving progress
@@ -39,15 +42,11 @@ public class QuizService {
         logger.debug("Quiz details: topic={}, gameMode={}, questions={}", 
                     quiz.getTopic(), quiz.getGameMode(), quiz.getQuestions());
         
-        User teacher = userRepository.findById(teacherId)
+        Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> {
                     logger.error("Teacher not found with ID: {}", teacherId);
                     return new RuntimeException("Teacher not found with ID: " + teacherId);
                 });
-        if (!"TEACHER".equals(teacher.getRole())) {
-            logger.error("User with ID {} is not a teacher", teacherId);
-            throw new RuntimeException("Only teachers can create quizzes");
-        }
         logger.debug("Found teacher: {}", teacher);
         
         quiz.setCreatedBy(teacher);
@@ -77,12 +76,12 @@ public class QuizService {
         }
 
         // Fetch the student
-        User student = userRepository.findById(studentId)
+        Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> {
                     logger.error("Student not found with ID: {}", studentId);
                     return new RuntimeException("Student not found with ID: " + studentId);
                 });
-        submission.setUser(student);
+        submission.setStudent(student);
 
         Quiz quiz = quizOptional.get();
 
@@ -138,36 +137,36 @@ public class QuizService {
         logger.debug("Progress saved for student ID {} on quiz ID {}", studentId, quiz.getId());
 
         // Award gems
-int gems = 10; // Base reward for completing the quiz
-gems += totalScore; // 1 gem per point scored
+        int gems = 10; // Base reward for completing the quiz
+        gems += totalScore; // 1 gem per point scored
 
-// Game mode bonuses
-if (quiz.getGameMode() == GameMode.BALLOON && maxStreak >= 3) {
-    gems += 5; // Bonus for achieving a streak of 3 or more
-} else if (quiz.getGameMode() == GameMode.TREASURE_HUNT && allCorrect) {
-    gems += 10; // Bonus for getting all answers correct
-}
+        // Game mode bonuses
+        if (quiz.getGameMode() == GameMode.BALLOON && maxStreak >= 3) {
+            gems += 5; // Bonus for achieving a streak of 3 or more
+        } else if (quiz.getGameMode() == GameMode.TREASURE_HUNT && allCorrect) {
+            gems += 10; // Bonus for getting all answers correct
+        }
 
-Reward gemReward = new Reward();
-gemReward.setStudent(student);
-gemReward.setType(Reward.RewardType.GEMS);
-gemReward.setGems(gems);
-gemReward.setEarnedFor("Completed quiz with ID " + quiz.getId() + " with a score of " + totalScore);
-gemReward.setEarnedAt(LocalDateTime.now());
-rewardRepository.save(gemReward);
-logger.debug("Awarded {} gems to student ID {} for quiz ID {}", gems, studentId, quiz.getId());
+        Reward gemReward = new Reward();
+        gemReward.setStudent(student);
+        gemReward.setType(Reward.RewardType.GEMS);
+        gemReward.setGems(gems);
+        gemReward.setEarnedFor("Completed quiz with ID " + quiz.getId() + " with a score of " + totalScore);
+        gemReward.setEarnedAt(LocalDateTime.now());
+        rewardRepository.save(gemReward);
+        logger.debug("Awarded {} gems to student ID {} for quiz ID {}", gems, studentId, quiz.getId());
 
-// Award a badge if all answers are correct
-if (allCorrect) {
-    Reward badgeReward = new Reward();
-    badgeReward.setStudent(student);
-    badgeReward.setType(Reward.RewardType.BADGE);
-    badgeReward.setBadgeName("Perfect Score Master");
-    badgeReward.setEarnedFor("Achieved a perfect score on quiz with ID " + quiz.getId());
-    badgeReward.setEarnedAt(LocalDateTime.now());
-    rewardRepository.save(badgeReward);
-    logger.debug("Awarded 'Perfect Score Master' badge to student ID {} for quiz ID {}", studentId, quiz.getId());
-}
+        // Award a badge if all answers are correct
+        if (allCorrect) {
+            Reward badgeReward = new Reward();
+            badgeReward.setStudent(student);
+            badgeReward.setType(Reward.RewardType.BADGE);
+            badgeReward.setBadgeName("Perfect Score Master");
+            badgeReward.setEarnedFor("Achieved a perfect score on quiz with ID " + quiz.getId());
+            badgeReward.setEarnedAt(LocalDateTime.now());
+            rewardRepository.save(badgeReward);
+            logger.debug("Awarded 'Perfect Score Master' badge to student ID {} for quiz ID {}", studentId, quiz.getId());
+        }
         return savedSubmission;
     }
 }

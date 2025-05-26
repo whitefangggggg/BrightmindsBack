@@ -20,7 +20,7 @@ public class Classroom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "teacher_id")
-    private User teacher;
+    private Teacher teacher;
 
     @ManyToMany
     @JoinTable(
@@ -28,7 +28,7 @@ public class Classroom {
         joinColumns = @JoinColumn(name = "classroom_id"),
         inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    private List<User> students;
+    private List<Student> students;
 
     @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Assignment> assignments;

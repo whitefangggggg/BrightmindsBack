@@ -15,7 +15,7 @@ public class Reward {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
-    private User student;
+    private Student student;
 
     @Enumerated(EnumType.STRING)
     private RewardType type; // GEMS or BADGE

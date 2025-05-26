@@ -30,7 +30,7 @@ public class Quiz {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;   // Reference to the teacher who created the quiz
+    private Teacher createdBy;   // Reference to the teacher who created the quiz
 
     @NotNull(message = "GameMode cannot be null")
     @Enumerated(EnumType.STRING)

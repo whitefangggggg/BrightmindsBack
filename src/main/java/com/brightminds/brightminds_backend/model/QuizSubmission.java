@@ -17,8 +17,8 @@ public class QuizSubmission {
     private Long quizId;      // Reference to the quiz
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;       // Reference to the student who submitted the quiz
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;       // Reference to the student who submitted the quiz
 
     @ElementCollection
     @CollectionTable(name = "submission_answers", joinColumns = @JoinColumn(name = "submission_id"))

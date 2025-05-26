@@ -1,9 +1,9 @@
 package com.brightminds.brightminds_backend.controller;
 
 import com.brightminds.brightminds_backend.model.Progress;
-import com.brightminds.brightminds_backend.model.User;
+import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.repository.ProgressRepository;
-import com.brightminds.brightminds_backend.repository.UserRepository;
+import com.brightminds.brightminds_backend.repository.StudentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +24,13 @@ public class ProgressController {
     private ProgressRepository progressRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private StudentRepository studentRepository;
 
     @GetMapping
     public ResponseEntity<?> getProgressByStudent(@RequestParam Long studentId) {
         logger.info("Retrieving progress for student ID: {}", studentId);
         try {
-            User student = userRepository.findById(studentId)
+            Student student = studentRepository.findById(studentId)
                     .orElseThrow(() -> {
                         logger.error("Student not found with ID: {}", studentId);
                         return new RuntimeException("Student not found with ID: " + studentId);

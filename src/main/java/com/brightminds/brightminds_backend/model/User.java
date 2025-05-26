@@ -5,8 +5,9 @@ import lombok.Data;
 
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Data
-public class User {
+public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,9 +17,6 @@ public class User {
 
     @Column(nullable = false)
     private String password;
-
-    @Column(nullable = false)
-    private String role; // "TEACHER" or "STUDENT"
 
     @Column(nullable = false)
     private String firstName;

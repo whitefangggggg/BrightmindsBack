@@ -1,7 +1,7 @@
 package com.brightminds.brightminds_backend.controller;
 
 import com.brightminds.brightminds_backend.model.Classroom;
-import com.brightminds.brightminds_backend.model.User;
+import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.service.ClassroomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,12 +33,12 @@ public class ClassroomController {
     }
 
     @PostMapping("/{id}/add-student")
-    public ResponseEntity<Classroom> addStudent(@PathVariable Long id, @RequestBody User student) {
+    public ResponseEntity<Classroom> addStudent(@PathVariable Long id, @RequestBody Student student) {
         return ResponseEntity.ok(classroomService.addStudentToClassroom(id, student));
     }
 
     @PostMapping("/{id}/remove-student")
-    public ResponseEntity<Classroom> removeStudent(@PathVariable Long id, @RequestBody User student) {
+    public ResponseEntity<Classroom> removeStudent(@PathVariable Long id, @RequestBody Student student) {
         return ResponseEntity.ok(classroomService.removeStudentFromClassroom(id, student));
     }
 

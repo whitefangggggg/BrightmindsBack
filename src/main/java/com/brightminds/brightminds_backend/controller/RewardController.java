@@ -1,9 +1,9 @@
 package com.brightminds.brightminds_backend.controller;
 
 import com.brightminds.brightminds_backend.model.Reward;
-import com.brightminds.brightminds_backend.model.User;
+import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.repository.RewardRepository;
-import com.brightminds.brightminds_backend.repository.UserRepository;
+import com.brightminds.brightminds_backend.repository.StudentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,13 @@ public class RewardController {
     private RewardRepository rewardRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private StudentRepository studentRepository;
 
     @GetMapping
     public ResponseEntity<List<Reward>> getRewardsByStudent(@RequestParam Long studentId) {
         logger.info("Retrieving rewards for student ID: {}", studentId);
         try {
-            User student = userRepository.findById(studentId)
+            Student student = studentRepository.findById(studentId)
                     .orElseThrow(() -> {
                         logger.error("Student not found with ID: {}", studentId);
                         return new RuntimeException("Student not found with ID: " + studentId);
@@ -46,7 +46,7 @@ public class RewardController {
     public ResponseEntity<Integer> getTotalGems(@RequestParam Long studentId) {
         logger.info("Retrieving total gems for student ID: {}", studentId);
         try {
-            User student = userRepository.findById(studentId)
+            Student student = studentRepository.findById(studentId)
                     .orElseThrow(() -> {
                         logger.error("Student not found with ID: {}", studentId);
                         return new RuntimeException("Student not found with ID: " + studentId);

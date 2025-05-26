@@ -1,7 +1,11 @@
 package com.brightminds.brightminds_backend.service;
 
 import com.brightminds.brightminds_backend.model.User;
+import com.brightminds.brightminds_backend.model.Teacher;
+import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.repository.UserRepository;
+import com.brightminds.brightminds_backend.repository.TeacherRepository;
+import com.brightminds.brightminds_backend.repository.StudentRepository;
 import com.brightminds.brightminds_backend.util.JwtUtil;
 import com.brightminds.brightminds_backend.dto.RegisterRequestDto;
 import com.brightminds.brightminds_backend.exception.AuthException;
@@ -14,6 +18,12 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TeacherRepository teacherRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -43,13 +53,23 @@ public class AuthService {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new AuthException("User with email " + registerRequest.getEmail() + " already exists");
         }
-        User user = new User();
-        user.setEmail(registerRequest.getEmail());
-        user.setPassword(registerRequest.getPassword());
-        user.setRole(registerRequest.getRole());
-        user.setFirstName(registerRequest.getFirstName());
-        user.setLastName(registerRequest.getLastName());
-        return userRepository.save(user);
+        User user;
+        if (registerRequest.getRole().equalsIgnoreCase("TEACHER")) {
+            Teacher teacher = new Teacher();
+            teacher.setEmail(registerRequest.getEmail());
+            teacher.setPassword(registerRequest.getPassword());
+            teacher.setFirstName(registerRequest.getFirstName());
+            teacher.setLastName(registerRequest.getLastName());
+            user = teacherRepository.save(teacher);
+        } else {
+            Student student = new Student();
+            student.setEmail(registerRequest.getEmail());
+            student.setPassword(registerRequest.getPassword());
+            student.setFirstName(registerRequest.getFirstName());
+            student.setLastName(registerRequest.getLastName());
+            user = studentRepository.save(student);
+        }
+        return user;
     }
 
     // Login a user and return token
