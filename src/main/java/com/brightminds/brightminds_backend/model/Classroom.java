@@ -30,12 +30,13 @@ public class Classroom {
     )
     private List<Student> students;
 
-    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Assignment> assignments;
-
     // Optionally, you can add a code for students to join the classroom
     @Column(unique = true)
     private String joinCode;
+
+    @ManyToOne
+    @JoinColumn(name = "activity_id")
+    private Game activity;
 
     // Optionally, you can add a leaderboard field or method to compute it
 }
