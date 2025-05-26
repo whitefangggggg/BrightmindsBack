@@ -50,4 +50,23 @@ public class GameController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/premade")
+    public List<Game> getPremadeGames() {
+        return gameRepository.findByIsPremadeTrue();
+    }
+
+    @GetMapping("/by-teacher/{teacherId}")
+    public List<Game> getGamesByTeacher(@PathVariable Long teacherId) {
+        return gameRepository.findAll().stream()
+            .filter(g -> g.getCreatedBy() != null && g.getCreatedBy().getId().equals(teacherId))
+            .toList();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Game> getGameById(@PathVariable Long id) {
+        return gameRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
 } 

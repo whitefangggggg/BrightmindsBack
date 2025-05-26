@@ -16,4 +16,10 @@ public class Game {
 
     private int maxScore;
     private int maxExp;
+
+    private boolean isPremade;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private Teacher createdBy;
 } 

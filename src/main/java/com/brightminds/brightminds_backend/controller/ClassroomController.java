@@ -2,11 +2,13 @@ package com.brightminds.brightminds_backend.controller;
 
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
+import com.brightminds.brightminds_backend.model.ClassroomGame;
 import com.brightminds.brightminds_backend.repository.StudentRepository;
 import com.brightminds.brightminds_backend.service.ClassroomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
 
@@ -67,5 +69,31 @@ public class ClassroomController {
     public ResponseEntity<List<Student>> getLeaderboard(@PathVariable Long id) {
         List<Student> leaderboard = classroomService.getLeaderboard(id);
         return ResponseEntity.ok(leaderboard);
+    }
+
+    @PostMapping("/{id}/assign-game")
+    public ResponseEntity<ClassroomGame> assignGameToClassroom(
+            @PathVariable Long id,
+            @RequestParam Long gameId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime deadline,
+            @RequestParam boolean isPremade) {
+        ClassroomGame classroomGame = classroomService.assignGameToClassroom(id, gameId, deadline, isPremade);
+        return ResponseEntity.ok(classroomGame);
+    }
+
+    @GetMapping("/{id}/games")
+    public ResponseEntity<List<ClassroomGame>> getGamesForClassroom(@PathVariable Long id) {
+        return ResponseEntity.ok(classroomService.getGamesForClassroom(id));
+    }
+
+    @GetMapping("/playground/games")
+    public ResponseEntity<List<ClassroomGame>> getPlaygroundGames() {
+        return ResponseEntity.ok(classroomService.getPlaygroundGames());
+    }
+
+    @GetMapping("/{id}/students")
+    public ResponseEntity<List<Student>> getStudentsInClassroom(@PathVariable Long id) {
+        Classroom classroom = classroomService.getClassroomById(id).orElseThrow();
+        return ResponseEntity.ok(classroom.getStudents());
     }
 }
