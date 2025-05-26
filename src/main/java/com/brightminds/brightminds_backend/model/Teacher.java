@@ -8,5 +8,5 @@ import lombok.Data;
 @Table(name = "teachers")
 @Data
 public class Teacher extends User {
-    // Add teacher-specific fields here in the future
+    private String profilePhoto; // URL or path to the uploaded profile photo
 } 

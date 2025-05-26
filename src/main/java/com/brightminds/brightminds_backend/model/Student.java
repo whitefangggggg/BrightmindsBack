@@ -14,6 +14,7 @@ public class Student extends User {
     // Add student-specific fields here in the future
     private int expAmount;
     private int studentLevel;
+    private String avatarImage; // URL or path to the chosen avatar image
 
     @OneToMany(mappedBy = "student")
     private List<Reward> rewards;
