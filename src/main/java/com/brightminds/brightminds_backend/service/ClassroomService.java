@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Service
 public class ClassroomService {
@@ -15,6 +17,7 @@ public class ClassroomService {
     private ClassroomRepository classroomRepository;
 
     public Classroom createClassroom(Classroom classroom) {
+        classroom.generateJoinCode();
         return classroomRepository.save(classroom);
     }
 
@@ -40,5 +43,22 @@ public class ClassroomService {
 
     public Classroom findByJoinCode(String joinCode) {
         return classroomRepository.findByJoinCode(joinCode);
+    }
+
+    public Classroom addStudentByJoinCode(String joinCode, Student student) {
+        Classroom classroom = classroomRepository.findByJoinCode(joinCode);
+        if (classroom == null) throw new RuntimeException("Classroom not found for join code: " + joinCode);
+        if (!classroom.getStudents().contains(student)) {
+            classroom.getStudents().add(student);
+            classroomRepository.save(classroom);
+        }
+        return classroom;
+    }
+
+    public List<Student> getLeaderboard(Long classroomId) {
+        Classroom classroom = classroomRepository.findById(classroomId).orElseThrow();
+        return classroom.getStudents().stream()
+                .sorted(Comparator.comparingInt(Student::getExpAmount).reversed())
+                .collect(Collectors.toList());
     }
 }

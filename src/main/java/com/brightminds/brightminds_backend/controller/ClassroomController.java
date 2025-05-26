@@ -2,6 +2,7 @@ package com.brightminds.brightminds_backend.controller;
 
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
+import com.brightminds.brightminds_backend.repository.StudentRepository;
 import com.brightminds.brightminds_backend.service.ClassroomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,9 @@ import java.util.List;
 public class ClassroomController {
     @Autowired
     private ClassroomService classroomService;
+
+    @Autowired
+    private StudentRepository studentRepository;
 
     @PostMapping
     public ResponseEntity<Classroom> createClassroom(@RequestBody Classroom classroom) {
@@ -50,5 +54,18 @@ public class ClassroomController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<Classroom> joinClassroom(@RequestParam String joinCode, @RequestParam Long studentId) {
+        Student student = studentRepository.findById(studentId).orElseThrow();
+        Classroom classroom = classroomService.addStudentByJoinCode(joinCode, student);
+        return ResponseEntity.ok(classroom);
+    }
+
+    @GetMapping("/{id}/leaderboard")
+    public ResponseEntity<List<Student>> getLeaderboard(@PathVariable Long id) {
+        List<Student> leaderboard = classroomService.getLeaderboard(id);
+        return ResponseEntity.ok(leaderboard);
     }
 }
