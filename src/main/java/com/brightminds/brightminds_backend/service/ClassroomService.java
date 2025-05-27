@@ -1,14 +1,14 @@
 package com.brightminds.brightminds_backend.service;
 
-import com.brightminds.brightminds_backend.model.Classroom;
-import com.brightminds.brightminds_backend.model.Student;
-import com.brightminds.brightminds_backend.model.ClassroomGame;
-import com.brightminds.brightminds_backend.model.Game;
+import com.brightminds.brightminds_backend.dto.CreateClassroomRequestDto;
+import com.brightminds.brightminds_backend.model.*;
 import com.brightminds.brightminds_backend.repository.ClassroomRepository;
 import com.brightminds.brightminds_backend.repository.ClassroomGameRepository;
+import com.brightminds.brightminds_backend.repository.TeacherRepository;
 import com.brightminds.brightminds_backend.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +23,9 @@ public class ClassroomService {
 
     @Autowired
     private ClassroomGameRepository classroomGameRepository;
+
+    @Autowired
+    private TeacherRepository teacherRepository;
 
     @Autowired
     private GameRepository gameRepository;
@@ -54,6 +57,18 @@ public class ClassroomService {
     public Classroom removeStudentFromClassroom(Long classroomId, Student student) {
         Classroom classroom = classroomRepository.findById(classroomId).orElseThrow();
         classroom.getStudents().remove(student);
+        return classroomRepository.save(classroom);
+    }
+
+    @Transactional
+    public Classroom createClassroom(CreateClassroomRequestDto classroomDTO) {
+        Teacher teacher = teacherRepository.findById(classroomDTO.getTeacherId())
+                .orElseThrow(() -> new RuntimeException("Teacher not found with id: " + classroomDTO.getTeacherId()));
+        Classroom classroom = new Classroom();
+        classroom.setName(classroomDTO.getName());
+        classroom.setDescription(classroomDTO.getDescription());
+        classroom.setTeacher(teacher);
+        classroom.generateJoinCode();
         return classroomRepository.save(classroom);
     }
 

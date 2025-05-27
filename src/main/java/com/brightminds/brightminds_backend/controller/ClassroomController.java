@@ -1,5 +1,6 @@
 package com.brightminds.brightminds_backend.controller;
 
+import com.brightminds.brightminds_backend.dto.CreateClassroomRequestDto;
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.model.Teacher;
@@ -45,7 +46,6 @@ public class ClassroomController {
 
     @GetMapping("/teacher/{teacherId}")
     public ResponseEntity<List<Classroom>> getClassroomsByTeacherId(@PathVariable Long teacherId) {
-        // You'll need to implement this logic in your ClassroomService
         List<Classroom> classrooms = classroomService.getClassroomsByTeacherId(teacherId);
         if (classrooms.isEmpty()) {
             return ResponseEntity.notFound().build();
