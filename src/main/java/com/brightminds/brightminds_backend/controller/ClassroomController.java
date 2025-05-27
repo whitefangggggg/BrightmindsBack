@@ -1,6 +1,6 @@
 package com.brightminds.brightminds_backend.controller;
 
-import com.brightminds.brightminds_backend.dto.CreateClassroomRequestDto;
+import com.brightminds.brightminds_backend.dto.CreateClassroomRequestDto; // Import the DTO
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.model.Teacher;
@@ -27,9 +27,12 @@ public class ClassroomController {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    // Modified to accept CreateClassroomRequestDto
     @PostMapping
-    public ResponseEntity<Classroom> createClassroom(@RequestBody Classroom classroom) {
-        return ResponseEntity.ok(classroomService.createClassroom(classroom));
+    public ResponseEntity<Classroom> createClassroom(@RequestBody CreateClassroomRequestDto createClassroomRequestDto) {
+        // Call the service method that expects CreateClassroomRequestDto
+        Classroom newClassroom = classroomService.createClassroom(createClassroomRequestDto);
+        return ResponseEntity.ok(newClassroom);
     }
 
     @GetMapping("/{id}")
