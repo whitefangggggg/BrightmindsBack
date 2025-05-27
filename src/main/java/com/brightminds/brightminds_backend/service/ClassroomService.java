@@ -40,6 +40,11 @@ public class ClassroomService {
         return classroomRepository.findAll();
     }
 
+    public List<Classroom> getClassroomsByTeacherId(Long teacherId) {
+        // This assumes your ClassroomRepository has a method like findByTeacherId
+        return classroomRepository.findByTeacherId(teacherId);
+    }
+
     public Classroom addStudentToClassroom(Long classroomId, Student student) {
         Classroom classroom = classroomRepository.findById(classroomId).orElseThrow();
         classroom.getStudents().add(student);

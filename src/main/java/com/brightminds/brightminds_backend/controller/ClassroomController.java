@@ -2,8 +2,10 @@ package com.brightminds.brightminds_backend.controller;
 
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
+import com.brightminds.brightminds_backend.model.Teacher;
 import com.brightminds.brightminds_backend.model.ClassroomGame;
 import com.brightminds.brightminds_backend.repository.StudentRepository;
+import com.brightminds.brightminds_backend.repository.TeacherRepository;
 import com.brightminds.brightminds_backend.service.ClassroomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,9 @@ public class ClassroomController {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private TeacherRepository teacherRepository;
+
     @PostMapping
     public ResponseEntity<Classroom> createClassroom(@RequestBody Classroom classroom) {
         return ResponseEntity.ok(classroomService.createClassroom(classroom));
@@ -36,6 +41,16 @@ public class ClassroomController {
     @GetMapping
     public List<Classroom> getAllClassrooms() {
         return classroomService.getAllClassrooms();
+    }
+
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<Classroom>> getClassroomsByTeacherId(@PathVariable Long teacherId) {
+        // You'll need to implement this logic in your ClassroomService
+        List<Classroom> classrooms = classroomService.getClassroomsByTeacherId(teacherId);
+        if (classrooms.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(classrooms);
     }
 
     @PostMapping("/{id}/add-student")

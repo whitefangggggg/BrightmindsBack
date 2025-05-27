@@ -5,5 +5,6 @@ public enum GameMode {
     TREASURE_HUNT,  // Unlock treasure chests, bonus for completing all questions correctly
     MATCHING,       // Match pairs of related items (MatchingGamePage)
     IMAGE_MULTIPLE_CHOICE, // Select the correct image (ImageMultipleChoiceGame)
-    SORTING         // Sort items into categories (LikasYamanGame)
-}
+    SORTING,         // Sort items into categories (LikasYamanGame)
+    FOUR_PICS_ONE_WORD
+    }
