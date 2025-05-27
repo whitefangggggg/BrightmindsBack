@@ -3,6 +3,7 @@ package com.brightminds.brightminds_backend.service;
 import com.brightminds.brightminds_backend.dto.CreateClassroomRequestDto;
 import com.brightminds.brightminds_backend.dto.LeaderboardEntryDto;
 import com.brightminds.brightminds_backend.dto.UpdateClassroomRequestDto;
+import com.brightminds.brightminds_backend.exception.ClassroomAlreadyJoinedException;
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.model.Teacher;
@@ -141,9 +142,11 @@ public class ClassroomService {
         if (classroom == null) {
             throw new RuntimeException("Classroom not found for join code: " + joinCode);
         }
-        if (student != null && !classroom.getStudents().contains(student)) {
+        if (student != null) {
+            if (classroom.getStudents().contains(student)) {
+                throw new ClassroomAlreadyJoinedException("You have already joined this classroom");
+            }
             classroom.getStudents().add(student);
-            // classroomRepository.save(classroom); // Changes to managed entity are often automatically persisted at transaction commit.
         }
         return classroom;
     }
