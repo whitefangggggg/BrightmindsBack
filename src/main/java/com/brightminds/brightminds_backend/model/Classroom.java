@@ -6,7 +6,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "classrooms")
-@Data
 public class Classroom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,5 +41,61 @@ public class Classroom {
 
     public void generateJoinCode() {
         this.joinCode = java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
+    public List<Student> getStudents() {
+        return students;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
+    }
+
+    public String getJoinCode() {
+        return joinCode;
+    }
+
+    public void setJoinCode(String joinCode) {
+        this.joinCode = joinCode;
+    }
+
+    public Game getActivity() {
+        return activity;
+    }
+
+    public void setActivity(Game activity) {
+        this.activity = activity;
     }
 }

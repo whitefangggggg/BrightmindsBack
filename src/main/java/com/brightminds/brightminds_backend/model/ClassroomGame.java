@@ -1,12 +1,10 @@
 package com.brightminds.brightminds_backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "classroom_games")
-@Data
 public class ClassroomGame {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +20,44 @@ public class ClassroomGame {
 
     private LocalDateTime deadline;
     private boolean isPremade;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Classroom getClassroom() {
+        return classroom;
+    }
+
+    public void setClassroom(Classroom classroom) {
+        this.classroom = classroom;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public LocalDateTime getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
+    }
+
+    public boolean isPremade() {
+        return isPremade;
+    }
+
+    public void setPremade(boolean premade) {
+        isPremade = premade;
+    }
 } 
