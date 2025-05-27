@@ -21,6 +21,9 @@ public class ClassroomGame {
     private LocalDateTime deadline;
     private boolean isPremade;
 
+    @Column(nullable = true) // Allows null for "unlimited"
+    private Integer maxAttempts;
+
     public Long getId() {
         return id;
     }
@@ -59,5 +62,13 @@ public class ClassroomGame {
 
     public void setPremade(boolean premade) {
         isPremade = premade;
+    }
+
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
     }
 } 
