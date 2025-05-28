@@ -1,6 +1,9 @@
 package com.brightminds.brightminds_backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import jakarta.persistence.Lob;
 
@@ -11,22 +14,28 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long activityId;
 
+    @NotBlank(message = "Activity name is required")
     @Column(nullable = false, unique = true)
     private String activityName;
 
+    @Min(value = 0, message = "Max score must be positive")
     private int maxScore;
+
+    @Min(value = 0, message = "Max experience must be positive")
     private int maxExp;
 
     private boolean isPremade;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private Teacher createdBy;
 
+    @NotNull(message = "Game mode is required")
     @Enumerated(EnumType.STRING)
     private GameMode gameMode;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String gameData; // JSON or other format for game-specific data
 
     public Long getActivityId() {
