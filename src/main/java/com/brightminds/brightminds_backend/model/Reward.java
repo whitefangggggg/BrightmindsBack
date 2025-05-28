@@ -1,7 +1,6 @@
 package com.brightminds.brightminds_backend.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,21 +14,18 @@ public class Reward {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @Enumerated(EnumType.STRING)
-    private RewardType type; // GEMS or BADGE
-
-    private int gems; // Only applicable if type is GEMS
-
-    private String badgeName; // Only applicable if type is BADGE
+    private String badgeName;
 
     private String earnedFor;
 
     private LocalDateTime earnedAt;
 
-    public enum RewardType {
-        GEMS, BADGE
+    // Constructor
+    public Reward() {
+        this.earnedAt = LocalDateTime.now();
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -44,22 +40,6 @@ public class Reward {
 
     public void setStudent(Student student) {
         this.student = student;
-    }
-
-    public RewardType getType() {
-        return type;
-    }
-
-    public void setType(RewardType type) {
-        this.type = type;
-    }
-
-    public int getGems() {
-        return gems;
-    }
-
-    public void setGems(int gems) {
-        this.gems = gems;
     }
 
     public String getBadgeName() {

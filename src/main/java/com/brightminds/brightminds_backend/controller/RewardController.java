@@ -26,7 +26,7 @@ public class RewardController {
 
     @GetMapping
     public ResponseEntity<List<Reward>> getRewardsByStudent(@RequestParam Long studentId) {
-        logger.info("Retrieving rewards for student ID: {}", studentId);
+        logger.info("Retrieving badges for student ID: {}", studentId);
         try {
             Student student = studentRepository.findById(studentId)
                     .orElseThrow(() -> {
@@ -34,29 +34,10 @@ public class RewardController {
                         return new RuntimeException("Student not found with ID: " + studentId);
                     });
             List<Reward> rewards = rewardRepository.findByStudent(student);
-            logger.debug("Found {} rewards for student ID {}", rewards.size(), studentId);
+            logger.debug("Found {} badges for student ID {}", rewards.size(), studentId);
             return ResponseEntity.ok(rewards);
         } catch (Exception e) {
-            logger.error("Error retrieving rewards: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
-    @GetMapping("/total")
-    public ResponseEntity<Integer> getTotalGems(@RequestParam Long studentId) {
-        logger.info("Retrieving total gems for student ID: {}", studentId);
-        try {
-            Student student = studentRepository.findById(studentId)
-                    .orElseThrow(() -> {
-                        logger.error("Student not found with ID: {}", studentId);
-                        return new RuntimeException("Student not found with ID: " + studentId);
-                    });
-            List<Reward> rewards = rewardRepository.findByStudent(student);
-            int totalGems = rewards.stream().mapToInt(Reward::getGems).sum();
-            logger.debug("Total gems for student ID {}: {}", studentId, totalGems);
-            return ResponseEntity.ok(totalGems);
-        } catch (Exception e) {
-            logger.error("Error retrieving total gems: {}", e.getMessage(), e);
+            logger.error("Error retrieving badges: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(null);
         }
     }
