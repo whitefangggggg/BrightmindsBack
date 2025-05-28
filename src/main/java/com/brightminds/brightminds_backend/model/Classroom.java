@@ -33,9 +33,9 @@ public class Classroom {
     @Column(unique = true)
     private String joinCode;
 
-    @ManyToOne
-    @JoinColumn(name = "activity_id")
-    private Game activity;
+    // @ManyToOne
+    // @JoinColumn(name = "activity_id")
+    // private Game activity;
 
     // Optionally, you can add a leaderboard field or method to compute it
 
@@ -91,11 +91,11 @@ public class Classroom {
         this.joinCode = joinCode;
     }
 
-    public Game getActivity() {
-        return activity;
-    }
+    // public Game getActivity() {
+    //     return activity;
+    // }
 
-    public void setActivity(Game activity) {
-        this.activity = activity;
-    }
+    // public void setActivity(Game activity) {
+    //     this.activity = activity;
+    // }
 }
