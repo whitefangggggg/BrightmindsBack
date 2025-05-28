@@ -5,6 +5,7 @@ import jakarta.persistence.Table;
 import java.util.List;
 import jakarta.persistence.OneToMany;
 import com.brightminds.brightminds_backend.model.Attempt;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "students")
@@ -15,9 +16,11 @@ public class Student extends User {
     private String avatarImage; // URL or path to the chosen avatar image
 
     @OneToMany(mappedBy = "student")
+    @JsonManagedReference
     private List<Reward> rewards;
 
     @OneToMany(mappedBy = "student")
+    @JsonManagedReference
     private List<Attempt> attempts;
 
     public int getExpAmount() { return expAmount; }

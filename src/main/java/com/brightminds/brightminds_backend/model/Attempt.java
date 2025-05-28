@@ -2,6 +2,7 @@ package com.brightminds.brightminds_backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "attempts")
@@ -12,6 +13,7 @@ public class Attempt {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "student_id")
+    @JsonBackReference
     private Student student;
 
     @ManyToOne(optional = false)

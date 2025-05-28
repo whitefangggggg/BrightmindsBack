@@ -1,6 +1,7 @@
 package com.brightminds.brightminds_backend.controller;
 
-import com.brightminds.brightminds_backend.dto.StudentGameAttemptRequestDto; // Import the new DTO
+import com.brightminds.brightminds_backend.dto.StudentGameAttemptRequestDto;
+import com.brightminds.brightminds_backend.dto.AttemptResponseDto;
 import com.brightminds.brightminds_backend.model.Attempt;
 // Keep existing model imports if used by other endpoints
 import com.brightminds.brightminds_backend.model.Student;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime; // Keep for playground endpoint
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/attempts") // Changed from "/api/attempts" to "/api/game-attempts" in my previous proposal, but sticking to your existing "/api/attempts"
@@ -37,6 +39,22 @@ public class AttemptController {
     // @Autowired
     // private ClassroomGameRepository classroomGameRepository; // Moved to AttemptService
 
+    private AttemptResponseDto convertToDto(Attempt attempt) {
+        AttemptResponseDto dto = new AttemptResponseDto();
+        dto.setAttemptId(attempt.getAttemptId());
+        dto.setStudentId(attempt.getStudent().getId());
+        dto.setGameId(attempt.getGame().getActivityId());
+        if (attempt.getClassroomGame() != null) {
+            dto.setClassroomGameId(attempt.getClassroomGame().getId());
+        }
+        dto.setScore(attempt.getScore());
+        dto.setExpReward(attempt.getExpReward());
+        dto.setTimeTaken(attempt.getTimeTaken());
+        dto.setTimeStarted(attempt.getTimeStarted());
+        dto.setTimeFinished(attempt.getTimeFinished());
+        return dto;
+    }
+
     /**
      * Student submits a score and other attempt details for a classroom-assigned game.
      * This endpoint now uses a RequestBody with a DTO.
@@ -45,7 +63,7 @@ public class AttemptController {
     public ResponseEntity<?> submitAssignedGameAttempt(@RequestBody StudentGameAttemptRequestDto attemptDto) {
         try {
             Attempt savedAttempt = attemptService.recordAttempt(attemptDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedAttempt);
+            return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(savedAttempt));
         } catch (IllegalArgumentException e) { // For known validation issues from service
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (RuntimeException e) { // For other specific errors like "Max attempts reached"
@@ -95,7 +113,7 @@ public class AttemptController {
             student.setExpAmount(student.getExpAmount() + attempt.getExpReward());
             studentRepository.save(student);
 
-            return ResponseEntity.ok(savedAttempt);
+            return ResponseEntity.ok(convertToDto(savedAttempt));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (Exception e) {
@@ -107,30 +125,35 @@ public class AttemptController {
 
     // Get all attempts for a student (remains the same)
     @GetMapping("/student/{studentId}")
-    public List<Attempt> getAttemptsByStudent(@PathVariable Long studentId) {
+    public List<AttemptResponseDto> getAttemptsByStudent(@PathVariable Long studentId) {
         // Consider moving this logic to AttemptService if not already
         return attemptRepository.findAll().stream()
                 .filter(a -> a.getStudent().getId().equals(studentId))
-                .toList();
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     // Get all attempts for a game (remains the same)
     @GetMapping("/game/{gameId}")
-    public List<Attempt> getAttemptsByGame(@PathVariable Long gameId) {
+    public List<AttemptResponseDto> getAttemptsByGame(@PathVariable Long gameId) {
         // Consider moving this logic to AttemptService if not already
         return attemptRepository.findAll().stream()
                 .filter(a -> a.getGame().getActivityId().equals(gameId))
-                .toList();
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     // Optional: New endpoint as suggested in my AttemptService to get attempts for a specific assignment
     @GetMapping("/assignment/{assignedGameId}/student/{studentId}")
-    public ResponseEntity<List<Attempt>> getAttemptsForAssignmentByStudent(
+    public ResponseEntity<List<AttemptResponseDto>> getAttemptsForAssignmentByStudent(
             @PathVariable Long assignedGameId,
             @PathVariable Long studentId) {
         try {
             List<Attempt> attempts = attemptService.getAttemptsByStudentAndAssignedGame(studentId, assignedGameId);
-            return ResponseEntity.ok(attempts);
+            List<AttemptResponseDto> dtos = attempts.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not retrieve attempts: " + e.getMessage(), e);
         }
