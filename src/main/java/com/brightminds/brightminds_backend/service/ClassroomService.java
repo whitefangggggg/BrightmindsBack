@@ -4,11 +4,13 @@ import com.brightminds.brightminds_backend.dto.CreateClassroomRequestDto;
 import com.brightminds.brightminds_backend.dto.LeaderboardEntryDto;
 import com.brightminds.brightminds_backend.dto.UpdateClassroomRequestDto;
 import com.brightminds.brightminds_backend.exception.ClassroomAlreadyJoinedException;
+import com.brightminds.brightminds_backend.model.Attempt; // Import Attempt
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.model.Teacher;
 import com.brightminds.brightminds_backend.model.ClassroomGame;
 import com.brightminds.brightminds_backend.model.Game;
+import com.brightminds.brightminds_backend.repository.AttemptRepository; // Import AttemptRepository
 import com.brightminds.brightminds_backend.repository.ClassroomRepository;
 import com.brightminds.brightminds_backend.repository.TeacherRepository;
 import com.brightminds.brightminds_backend.repository.ClassroomGameRepository;
@@ -40,6 +42,9 @@ public class ClassroomService {
     @Autowired
     private GameRepository gameRepository;
 
+    @Autowired
+    private AttemptRepository attemptRepository;
+
     @Transactional
     public Classroom createClassroom(CreateClassroomRequestDto classroomDTO) {
         Teacher teacher = teacherRepository.findById(classroomDTO.getTeacherId())
@@ -49,13 +54,12 @@ public class ClassroomService {
         classroom.setName(classroomDTO.getName());
         classroom.setDescription(classroomDTO.getDescription());
         classroom.setTeacher(teacher);
-        classroom.generateJoinCode(); // Ensure this method is in your Classroom entity
+        classroom.generateJoinCode();
         return classroomRepository.save(classroom);
     }
 
     @Transactional(readOnly = true)
     public List<Classroom> getClassroomsByTeacherId(Long teacherId) {
-        // Ensure ClassroomRepository has findByTeacherId(Long teacherId)
         return classroomRepository.findByTeacherId(teacherId);
     }
 
@@ -88,20 +92,25 @@ public class ClassroomService {
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found with id: " + classroomId + " for deletion."));
 
-        // 1. Delete associated ClassroomGames
+        // 1. Find all ClassroomGames associated with this classroom
         List<ClassroomGame> gamesInClassroom = classroomGameRepository.findByClassroomId(classroomId);
         if (gamesInClassroom != null && !gamesInClassroom.isEmpty()) {
+            // For each ClassroomGame, delete associated Attempts first
+            for (ClassroomGame cg : gamesInClassroom) {
+                // Ensure AttemptRepository has findByClassroomGame(ClassroomGame classroomGame)
+                List<Attempt> attemptsForCg = attemptRepository.findByClassroomGame(cg);
+                if (attemptsForCg != null && !attemptsForCg.isEmpty()) {
+                    attemptRepository.deleteAll(attemptsForCg);
+                }
+            }
+            // Now, delete the ClassroomGames themselves
             classroomGameRepository.deleteAll(gamesInClassroom);
         }
 
-        // 2. Clear students from the classroom (handles the join table for @ManyToMany)
+        // 2. Clear students from the classroom and save to update the join table
         if (classroom.getStudents() != null && !classroom.getStudents().isEmpty()) {
-            // This clears the associations in the join table from the Classroom side.
-            // The Student entities themselves are not deleted by this operation.
             classroom.getStudents().clear();
-            // classroomRepository.save(classroom); // Save to persist the cleared collection if necessary before delete
-            // Though, deleting the classroom itself should handle join table cleanup
-            // if Classroom is the owner of the @ManyToMany.
+            classroomRepository.save(classroom);
         }
 
         // 3. Finally, delete the classroom itself
@@ -113,7 +122,6 @@ public class ClassroomService {
     public Classroom addStudentToClassroom(Long classroomId, Student student) {
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found with id: " + classroomId));
-        // Ensure student is a managed entity if necessary, or that it's not already in the list
         if (student != null && !classroom.getStudents().contains(student)) {
             classroom.getStudents().add(student);
         }
@@ -132,13 +140,12 @@ public class ClassroomService {
 
     @Transactional(readOnly = true)
     public Classroom findByJoinCode(String joinCode) {
-        // Ensure ClassroomRepository has findByJoinCode(String joinCode)
         return classroomRepository.findByJoinCode(joinCode);
     }
 
     @Transactional
     public Classroom addStudentByJoinCode(String joinCode, Student student) {
-        Classroom classroom = findByJoinCode(joinCode); // Use the method to find by join code
+        Classroom classroom = findByJoinCode(joinCode);
         if (classroom == null) {
             throw new RuntimeException("Classroom not found for join code: " + joinCode);
         }
@@ -148,7 +155,7 @@ public class ClassroomService {
             }
             classroom.getStudents().add(student);
         }
-        return classroom;
+        return classroomRepository.save(classroom);
     }
 
     @Transactional(readOnly = true)
@@ -163,7 +170,7 @@ public class ClassroomService {
         }
 
         return students.stream()
-                .filter(s -> s != null && s.getId() != null && s.getFirstName() != null && s.getLastName() != null) // Ensure student and key fields are not null
+                .filter(s -> s != null && s.getId() != null && s.getFirstName() != null && s.getLastName() != null)
                 .sorted(Comparator.comparingInt(Student::getExpAmount).reversed())
                 .map(student -> new LeaderboardEntryDto(
                         student.getId(),
@@ -176,7 +183,7 @@ public class ClassroomService {
     }
 
     @Transactional
-    public ClassroomGame assignGameToClassroom(Long classroomId, Long gameId, LocalDateTime deadline, boolean isPremade) {
+    public ClassroomGame assignGameToClassroom(Long classroomId, Long gameId, LocalDateTime deadline, boolean isPremade, Integer maxAttempts) {
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found with id: " + classroomId));
         Game game = gameRepository.findById(gameId)
@@ -187,18 +194,17 @@ public class ClassroomService {
         classroomGame.setGame(game);
         classroomGame.setDeadline(deadline);
         classroomGame.setPremade(isPremade);
+        classroomGame.setMaxAttempts(maxAttempts);
         return classroomGameRepository.save(classroomGame);
     }
 
     @Transactional(readOnly = true)
     public List<ClassroomGame> getGamesForClassroom(Long classroomId) {
-        // Ensure ClassroomGameRepository has findByClassroomId(Long classroomId)
         return classroomGameRepository.findByClassroomId(classroomId);
     }
 
     @Transactional(readOnly = true)
     public List<ClassroomGame> getPlaygroundGames() {
-        // Ensure ClassroomGameRepository has findByGameIsPremadeTrue()
         return classroomGameRepository.findByGameIsPremadeTrue();
     }
 }

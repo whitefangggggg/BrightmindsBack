@@ -1,11 +1,10 @@
 package com.brightminds.brightminds_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import jakarta.persistence.Lob;
 
 @Entity
 @Table(name = "games")
@@ -17,6 +16,14 @@ public class Game {
     @NotBlank(message = "Activity name is required")
     @Column(nullable = false, unique = true)
     private String activityName;
+
+    // New field
+    @Column(length = 1000) // Optional: define length for description
+    private String description;
+
+    // New field
+    @Column(length = 255) // Optional: define length for subject
+    private String subject;
 
     @Min(value = 0, message = "Max score must be positive")
     private int maxScore;
@@ -38,6 +45,8 @@ public class Game {
     @Column(columnDefinition = "TEXT")
     private String gameData; // JSON or other format for game-specific data
 
+    // Getters and Setters
+
     public Long getActivityId() {
         return activityId;
     }
@@ -52,6 +61,22 @@ public class Game {
 
     public void setActivityName(String activityName) {
         this.activityName = activityName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     public int getMaxScore() {
@@ -78,6 +103,7 @@ public class Game {
         isPremade = premade;
     }
 
+    @JsonIgnore
     public Teacher getCreatedBy() {
         return createdBy;
     }
@@ -101,4 +127,4 @@ public class Game {
     public void setGameData(String gameData) {
         this.gameData = gameData;
     }
-} 
+}
