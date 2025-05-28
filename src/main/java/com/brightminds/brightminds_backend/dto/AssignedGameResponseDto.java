@@ -33,15 +33,20 @@ public class AssignedGameResponseDto {
         private String subject;
         private GameMode gameMode;
         private boolean isGamePremade; // Game.isPremade
+        private String gameData; // <-- ADDED gameData field
 
-        public GameInfo(Long activityId, String activityName, String description, String subject, GameMode gameMode, boolean isGamePremade) {
+        // Updated constructor to include gameData
+        public GameInfo(Long activityId, String activityName, String description, String subject, GameMode gameMode, boolean isGamePremade, String gameData) {
             this.activityId = activityId;
             this.activityName = activityName;
             this.description = description;
             this.subject = subject;
             this.gameMode = gameMode;
             this.isGamePremade = isGamePremade;
+            this.gameData = gameData; // <-- ASSIGN gameData
         }
+
+        // Getters and Setters
         public Long getActivityId() { return activityId; }
         public void setActivityId(Long activityId) { this.activityId = activityId; }
         public String getActivityName() { return activityName; }
@@ -52,24 +57,25 @@ public class AssignedGameResponseDto {
         public void setSubject(String subject) { this.subject = subject; }
         public GameMode getGameMode() { return gameMode; }
         public void setGameMode(GameMode gameMode) { this.gameMode = gameMode; }
-        public boolean isGamePremade() { return isGamePremade; } // Corrected getter name
-        public void setGamePremade(boolean premade) { isGamePremade = premade; } // Corrected setter name
+        public boolean isGamePremade() { return isGamePremade; }
+        public void setGamePremade(boolean premade) { isGamePremade = premade; }
+
+        public String getGameData() { return gameData; } // <-- ADDED getter for gameData
+        public void setGameData(String gameData) { this.gameData = gameData; } // <-- ADDED setter for gameData
     }
 
     public static AssignedGameResponseDto from(com.brightminds.brightminds_backend.model.ClassroomGame cg) {
         AssignedGameResponseDto dto = new AssignedGameResponseDto();
         dto.setId(cg.getId());
         dto.setDeadline(cg.getDeadline());
-        dto.setPremadeAssignment(cg.isPremade());
+        dto.setPremadeAssignment(cg.isPremade()); // This refers to ClassroomGame.isPremade
         dto.setMaxAttempts(cg.getMaxAttempts());
-        // Determine status based on deadline, actual attempts vs maxAttempts, etc.
-        // For now, a simple placeholder:
+
         if (cg.getDeadline() != null && LocalDateTime.now().isAfter(cg.getDeadline())) {
-            dto.setStatus("OVERDUE"); // Example status logic
+            dto.setStatus("OVERDUE");
         } else {
             dto.setStatus("PENDING");
         }
-
 
         if (cg.getClassroom() != null) {
             dto.setClassroom(new ClassroomInfo(cg.getClassroom().getId(), cg.getClassroom().getName()));
@@ -83,7 +89,8 @@ public class AssignedGameResponseDto {
                     gameEntity.getDescription(),
                     gameEntity.getSubject(),
                     gameEntity.getGameMode(),
-                    gameEntity.isPremade()
+                    gameEntity.isPremade(), // This refers to Game.isPremade
+                    gameEntity.getGameData() // <-- PASS gameData here
             ));
         }
         return dto;
@@ -98,7 +105,7 @@ public class AssignedGameResponseDto {
     public void setGame(GameInfo game) { this.game = game; }
     public LocalDateTime getDeadline() { return deadline; }
     public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
-    public boolean isPremadeAssignment() { return isPremadeAssignment; }
+    public boolean isPremadeAssignment() { return isPremadeAssignment; } // Getter for the field in AssignedGameResponseDto
     public void setPremadeAssignment(boolean premadeAssignment) { this.isPremadeAssignment = premadeAssignment; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
