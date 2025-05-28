@@ -4,6 +4,7 @@ import com.brightminds.brightminds_backend.model.Reward;
 import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.repository.RewardRepository;
 import com.brightminds.brightminds_backend.repository.StudentRepository;
+import com.brightminds.brightminds_backend.service.RewardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class RewardController {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private RewardService rewardService;
+
     @GetMapping
     public ResponseEntity<List<Reward>> getRewardsByStudent(@RequestParam Long studentId) {
         logger.info("Retrieving badges for student ID: {}", studentId);
@@ -39,6 +43,18 @@ public class RewardController {
         } catch (Exception e) {
             logger.error("Error retrieving badges: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @PostMapping("/award-top-performers/{classroomId}")
+    public ResponseEntity<String> awardTopPerformersBadges(@PathVariable Long classroomId) {
+        logger.info("Awarding badges to top performers in classroom ID: {}", classroomId);
+        try {
+            rewardService.awardTopPerformersBadges(classroomId);
+            return ResponseEntity.ok("Badges awarded successfully to top performers");
+        } catch (Exception e) {
+            logger.error("Error awarding badges: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body("Error awarding badges: " + e.getMessage());
         }
     }
 }
