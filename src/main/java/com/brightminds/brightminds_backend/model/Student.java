@@ -16,11 +16,11 @@ public class Student extends User {
     private String avatarImage; // URL or path to the chosen avatar image
 
     @OneToMany(mappedBy = "student")
-    @JsonManagedReference
+    @JsonManagedReference("student-rewards")
     private List<Reward> rewards;
 
     @OneToMany(mappedBy = "student")
-    @JsonManagedReference
+    @JsonManagedReference("student-attempts")
     private List<Attempt> attempts;
 
     public int getExpAmount() { return expAmount; }

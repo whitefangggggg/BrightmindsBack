@@ -13,7 +13,7 @@ public class Attempt {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "student_id")
-    @JsonBackReference
+    @JsonBackReference("attempt-student")
     private Student student;
 
     @ManyToOne(optional = false)
@@ -23,6 +23,7 @@ public class Attempt {
     // MODIFICATION: Link Attempt directly to the specific ClassroomGame (assignment)
     @ManyToOne // Make optional=false if an attempt MUST always be tied to an assignment
     @JoinColumn(name = "classroom_game_id", nullable = true) // nullable=true allows attempts for non-assigned/playground games
+    @JsonBackReference("attempt-classroomgame")
     private ClassroomGame classroomGame;
 
     private int score;

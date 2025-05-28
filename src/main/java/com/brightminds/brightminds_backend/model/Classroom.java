@@ -3,6 +3,8 @@ package com.brightminds.brightminds_backend.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "classrooms")
@@ -19,6 +21,7 @@ public class Classroom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "teacher_id")
+    @JsonBackReference("classroom-teacher")
     private Teacher teacher;
 
     @ManyToMany
@@ -27,6 +30,7 @@ public class Classroom {
         joinColumns = @JoinColumn(name = "classroom_id"),
         inverseJoinColumns = @JoinColumn(name = "student_id")
     )
+    @JsonManagedReference("classroom-students")
     private List<Student> students;
 
     // Optionally, you can add a code for students to join the classroom
