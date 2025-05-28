@@ -5,10 +5,12 @@ import com.brightminds.brightminds_backend.model.Attempt;
 import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.model.Game;
 import com.brightminds.brightminds_backend.model.ClassroomGame; // Import ClassroomGame
+import com.brightminds.brightminds_backend.model.ClassroomScore;
 import com.brightminds.brightminds_backend.repository.AttemptRepository;
 import com.brightminds.brightminds_backend.repository.StudentRepository;
 import com.brightminds.brightminds_backend.repository.GameRepository;
 import com.brightminds.brightminds_backend.repository.ClassroomGameRepository; // Needed for ClassroomGame
+import com.brightminds.brightminds_backend.repository.ClassroomScoreRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,9 @@ public class AttemptService {
 
     @Autowired
     private ClassroomGameRepository classroomGameRepository; // Autowire this
+
+    @Autowired
+    private ClassroomScoreRepository classroomScoreRepository;
 
     @Transactional
     public Attempt recordAttempt(StudentGameAttemptRequestDto attemptDto) {
@@ -85,6 +90,23 @@ public class AttemptService {
             attempt.setExpReward(Math.max(0, (int) (scoreRatio * gameMaxExp)));
         }
 
+        // Update classroom-specific score if this is a classroom game
+        if (classroomGame != null) {
+            ClassroomScore score = classroomScoreRepository
+                    .findByClassroomAndStudent(classroomGame.getClassroom(), student)
+                    .orElseGet(() -> {
+                        ClassroomScore newScore = new ClassroomScore();
+                        newScore.setClassroom(classroomGame.getClassroom());
+                        newScore.setStudent(student);
+                        newScore.setTotalScore(0);
+                        return newScore;
+                    });
+            
+            score.addScore(attemptDto.getScore());
+            classroomScoreRepository.save(score);
+        }
+
+        // Update global exp
         student.setExpAmount(student.getExpAmount() + attempt.getExpReward());
         studentRepository.save(student);
 

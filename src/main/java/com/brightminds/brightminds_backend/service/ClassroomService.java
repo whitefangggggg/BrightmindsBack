@@ -10,11 +10,13 @@ import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.model.Teacher;
 import com.brightminds.brightminds_backend.model.ClassroomGame;
 import com.brightminds.brightminds_backend.model.Game;
+import com.brightminds.brightminds_backend.model.ClassroomScore;
 import com.brightminds.brightminds_backend.repository.AttemptRepository; // Import AttemptRepository
 import com.brightminds.brightminds_backend.repository.ClassroomRepository;
 import com.brightminds.brightminds_backend.repository.TeacherRepository;
 import com.brightminds.brightminds_backend.repository.ClassroomGameRepository;
 import com.brightminds.brightminds_backend.repository.GameRepository;
+import com.brightminds.brightminds_backend.repository.ClassroomScoreRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,9 @@ public class ClassroomService {
 
     @Autowired
     private AttemptRepository attemptRepository;
+
+    @Autowired
+    private ClassroomScoreRepository classroomScoreRepository;
 
     @Transactional
     public Classroom createClassroom(CreateClassroomRequestDto classroomDTO) {
@@ -154,6 +159,13 @@ public class ClassroomService {
                 throw new ClassroomAlreadyJoinedException("You have already joined this classroom");
             }
             classroom.getStudents().add(student);
+            
+            // Initialize classroom score for the new student
+            ClassroomScore score = new ClassroomScore();
+            score.setClassroom(classroom);
+            score.setStudent(student);
+            score.setTotalScore(0);
+            classroomScoreRepository.save(score);
         }
         return classroomRepository.save(classroom);
     }
@@ -163,22 +175,23 @@ public class ClassroomService {
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found with id: " + classroomId));
 
-        List<Student> students = classroom.getStudents();
+        List<ClassroomScore> scores = classroomScoreRepository.findByClassroomOrderByTotalScoreDesc(classroom);
 
-        if (students == null || students.isEmpty()) {
+        if (scores.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return students.stream()
-                .filter(s -> s != null && s.getId() != null && s.getFirstName() != null && s.getLastName() != null)
-                .sorted(Comparator.comparingInt(Student::getExpAmount).reversed())
-                .map(student -> new LeaderboardEntryDto(
-                        student.getId(),
-                        student.getFirstName(),
-                        student.getLastName(),
-                        student.getExpAmount(),
-                        student.getAvatarImage()
-                ))
+        return scores.stream()
+                .map(score -> {
+                    Student student = score.getStudent();
+                    return new LeaderboardEntryDto(
+                            student.getId(),
+                            student.getFirstName(),
+                            student.getLastName(),
+                            score.getTotalScore(), // Use classroom-specific score instead of global exp
+                            student.getAvatarImage()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
