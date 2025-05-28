@@ -11,6 +11,7 @@ import com.brightminds.brightminds_backend.repository.StudentRepository;
 // TeacherRepository might be needed if you perform direct teacher checks here
 // import com.brightminds.brightminds_backend.repository.TeacherRepository;
 import com.brightminds.brightminds_backend.service.ClassroomService;
+import com.brightminds.brightminds_backend.exception.ClassroomAlreadyJoinedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -116,13 +117,13 @@ public class ClassroomController {
     @PostMapping("/enroll")
     public ResponseEntity<Classroom> enrollInClassroom(@RequestBody JoinClassroomRequestDto joinRequest) {
         try {
-            // It's good practice for the service layer to handle fetching the student entity
             Student student = studentRepository.findById(joinRequest.getStudentId())
                     .orElseThrow(() -> new RuntimeException("Student not found with id: " + joinRequest.getStudentId()));
             Classroom classroom = classroomService.addStudentByJoinCode(joinRequest.getJoinCode(), student);
             return ResponseEntity.ok(classroom);
+        } catch (ClassroomAlreadyJoinedException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         } catch (RuntimeException e) {
-            // If classroom not found by join code, or student not found.
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
