@@ -39,7 +39,13 @@ public class ClassroomController {
             Classroom newClassroom = classroomService.createClassroom(createClassroomRequestDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(newClassroom);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("already exists")) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage, e);
+            } else if (errorMessage.contains("not found")) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage, e);
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage, e);
         }
     }
 

@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "classrooms")
@@ -21,7 +22,7 @@ public class Classroom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "teacher_id")
-    @JsonBackReference("classroom-teacher")
+    @JsonIgnoreProperties({"classrooms"})
     private Teacher teacher;
 
     @ManyToMany

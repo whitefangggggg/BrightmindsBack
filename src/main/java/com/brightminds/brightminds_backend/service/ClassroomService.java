@@ -52,6 +52,11 @@ public class ClassroomService {
 
     @Transactional
     public Classroom createClassroom(CreateClassroomRequestDto classroomDTO) {
+        // Check if a classroom with this name already exists
+        if (classroomRepository.findByName(classroomDTO.getName()) != null) {
+            throw new RuntimeException("A classroom with the name '" + classroomDTO.getName() + "' already exists. Please choose a different name.");
+        }
+
         Teacher teacher = teacherRepository.findById(classroomDTO.getTeacherId())
                 .orElseThrow(() -> new RuntimeException("Teacher not found with id: " + classroomDTO.getTeacherId()));
 

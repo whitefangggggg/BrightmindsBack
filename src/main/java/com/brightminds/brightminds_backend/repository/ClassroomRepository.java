@@ -9,4 +9,5 @@ import java.util.List;
 public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
     Classroom findByJoinCode(String joinCode);
     List<Classroom> findByTeacherId(Long teacherId);
+    Classroom findByName(String name);
 }
