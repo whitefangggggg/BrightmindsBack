@@ -15,14 +15,21 @@ public class Attempt {
     private Student student;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "activity_id")
+    @JoinColumn(name = "activity_id") // This refers to the Game.activityId (the game template)
     private Game game;
+
+    // MODIFICATION: Link Attempt directly to the specific ClassroomGame (assignment)
+    @ManyToOne // Make optional=false if an attempt MUST always be tied to an assignment
+    @JoinColumn(name = "classroom_game_id", nullable = true) // nullable=true allows attempts for non-assigned/playground games
+    private ClassroomGame classroomGame;
 
     private int score;
     private int expReward;
     private int timeTaken; // in seconds
     private LocalDateTime timeStarted;
     private LocalDateTime timeFinished;
+
+    // Getters and Setters
 
     public Long getAttemptId() {
         return attemptId;
@@ -46,6 +53,15 @@ public class Attempt {
 
     public void setGame(Game game) {
         this.game = game;
+    }
+
+    // Getter and Setter for classroomGame
+    public ClassroomGame getClassroomGame() {
+        return classroomGame;
+    }
+
+    public void setClassroomGame(ClassroomGame classroomGame) {
+        this.classroomGame = classroomGame;
     }
 
     public int getScore() {
@@ -87,4 +103,4 @@ public class Attempt {
     public void setTimeFinished(LocalDateTime timeFinished) {
         this.timeFinished = timeFinished;
     }
-} 
+}
