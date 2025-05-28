@@ -97,10 +97,9 @@ public class ClassroomService {
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found with id: " + classroomId + " for deletion."));
 
-        // 1. Find all ClassroomGames associated with this classroom
+        // 1. Delete Attempts and then ClassroomGames
         List<ClassroomGame> gamesInClassroom = classroomGameRepository.findByClassroomId(classroomId);
         if (gamesInClassroom != null && !gamesInClassroom.isEmpty()) {
-            // For each ClassroomGame, delete associated Attempts first
             for (ClassroomGame cg : gamesInClassroom) {
                 // Ensure AttemptRepository has findByClassroomGame(ClassroomGame classroomGame)
                 List<Attempt> attemptsForCg = attemptRepository.findByClassroomGame(cg);
@@ -112,13 +111,26 @@ public class ClassroomService {
             classroomGameRepository.deleteAll(gamesInClassroom);
         }
 
-        // 2. Clear students from the classroom and save to update the join table
-        if (classroom.getStudents() != null && !classroom.getStudents().isEmpty()) {
-            classroom.getStudents().clear();
-            classroomRepository.save(classroom);
+        // 2. Delete ClassroomScores associated with this classroom
+        // You might need to add a method like findByClassroomId or findByClassroom in ClassroomScoreRepository
+        // For now, assuming findByClassroom exists or you adapt it.
+        List<ClassroomScore> scoresInClassroom = classroomScoreRepository.findByClassroomOrderByTotalScoreDesc(classroom); // Re-using existing method and filtering, or use a more direct findByClassroom(classroom) or findByClassroomId(classroomId)
+        if (scoresInClassroom != null && !scoresInClassroom.isEmpty()) {
+            classroomScoreRepository.deleteAll(scoresInClassroom);
         }
 
-        // 3. Finally, delete the classroom itself
+        // 3. Clear students from the classroom (removes entries from the join table)
+        if (classroom.getStudents() != null && !classroom.getStudents().isEmpty()) {
+            classroom.getStudents().clear();
+            // classroomRepository.save(classroom); // This save might be redundant if the final delete cascades appropriately for the join table,
+            // but explicitly clearing and saving before delete is safer for ManyToMany disassociations.
+            // Given the original code already does this, it's kept.
+        }
+        // If `classroomRepository.save(classroom)` after `clear()` isn't strictly needed due to how Hibernate manages
+        // the session and cascading for the join table on delete, you could potentially remove it.
+        // However, it doesn't harm to be explicit.
+
+        // 4. Finally, delete the classroom itself
         classroomRepository.delete(classroom);
     }
 
@@ -159,7 +171,7 @@ public class ClassroomService {
                 throw new ClassroomAlreadyJoinedException("You have already joined this classroom");
             }
             classroom.getStudents().add(student);
-            
+
             // Initialize classroom score for the new student
             ClassroomScore score = new ClassroomScore();
             score.setClassroom(classroom);
