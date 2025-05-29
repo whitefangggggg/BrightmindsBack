@@ -7,14 +7,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "games")
+@Table(name = "games", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"activity_name", "game_mode"})
+})
 public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long activityId;
 
     @NotBlank(message = "Activity name is required")
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String activityName;
 
     // New field
