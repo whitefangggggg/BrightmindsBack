@@ -1,10 +1,6 @@
 package com.brightminds.brightminds_backend.controller;
 
-import com.brightminds.brightminds_backend.dto.CreateClassroomRequestDto;
-import com.brightminds.brightminds_backend.dto.JoinClassroomRequestDto;
-import com.brightminds.brightminds_backend.dto.LeaderboardEntryDto;
-import com.brightminds.brightminds_backend.dto.UpdateClassroomRequestDto;
-import com.brightminds.brightminds_backend.dto.AssignedGameResponseDto; // Import the DTO
+import com.brightminds.brightminds_backend.dto.*;
 import com.brightminds.brightminds_backend.model.Classroom;
 import com.brightminds.brightminds_backend.model.Student;
 import com.brightminds.brightminds_backend.model.ClassroomGame;
@@ -199,6 +195,48 @@ public class ClassroomController {
             return ResponseEntity.ok(classroom);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{classroomId}/games/{gameId}/leaderboard")
+    public ResponseEntity<List<LeaderboardEntryDto>> getGameLeaderboard(
+            @PathVariable Long classroomId,
+            @PathVariable Long gameId) {
+        try {
+            // You'll need to implement this service method
+            List<LeaderboardEntryDto> leaderboard = classroomService.getGameLeaderboard(classroomId, gameId);
+            return ResponseEntity.ok(leaderboard);
+        } catch (RuntimeException e) {
+            // Handle exceptions, e.g., game not found, classroom not found
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping("/{classroomId}/assigned-games/{assignedGameId}")
+    public ResponseEntity<AssignedGameResponseDto> updateAssignedGameDetails(
+            @PathVariable Long classroomId,
+            @PathVariable Long assignedGameId,
+            @RequestBody UpdateAssignedGameRequestDto updateRequest) { // Assuming you create this DTO
+        try {
+            ClassroomGame updatedClassroomGame = classroomService.updateAssignedGameDetails(classroomId, assignedGameId, updateRequest);
+            AssignedGameResponseDto responseDto = AssignedGameResponseDto.from(updatedClassroomGame);
+            return ResponseEntity.ok(responseDto);
+        } catch (RuntimeException e) {
+            // Handle exceptions
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @DeleteMapping("/{classroomId}/assigned-games/{assignedGameId}")
+    public ResponseEntity<Void> deleteAssignedGame(
+            @PathVariable Long classroomId,
+            @PathVariable Long assignedGameId) {
+        try {
+            classroomService.deleteAssignedGame(classroomId, assignedGameId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            // Handle exceptions
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 }

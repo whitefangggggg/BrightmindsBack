@@ -13,4 +13,4 @@ import java.util.List;
 public interface ClassroomScoreRepository extends JpaRepository<ClassroomScore, Long> {
     Optional<ClassroomScore> findByClassroomAndStudent(Classroom classroom, Student student);
     List<ClassroomScore> findByClassroomOrderByTotalScoreDesc(Classroom classroom);
-} 
+}
