@@ -104,8 +104,6 @@ public class GameController {
 
     @GetMapping("/by-teacher/{teacherId}")
     public List<Game> getGamesByTeacher(@PathVariable Long teacherId) {
-        return gameRepository.findAll().stream()
-            .filter(g -> g.getCreatedBy() != null && g.getCreatedBy().getId().equals(teacherId))
-            .toList();
+        return gameRepository.findByTeacherIdOrPremade(teacherId);
     }
 } 
