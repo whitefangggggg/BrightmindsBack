@@ -13,8 +13,10 @@ import com.brightminds.brightminds_backend.repository.ClassroomGameRepository; /
 import com.brightminds.brightminds_backend.repository.ClassroomScoreRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -62,7 +64,7 @@ public class AttemptService {
 
         // Check deadline
         if (classroomGame.getDeadline() != null && LocalDateTime.now().isAfter(classroomGame.getDeadline())) {
-            throw new RuntimeException("Deadline has passed for this game assignment.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Deadline has passed for this game assignment.");
         }
 
         // Check max attempts
@@ -70,17 +72,32 @@ public class AttemptService {
         if (maxAttempts != null && maxAttempts > 0) { // maxAttempts > 0 means limited
             long existingAttemptsCount = attemptRepository.countByStudentIdAndClassroomGameId(studentIdLong, assignedGameIdLong);
             if (existingAttemptsCount >= maxAttempts) {
-                throw new RuntimeException("Maximum number of attempts reached for this game assignment.");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Maximum number of attempts reached for this game assignment.");
             }
         }
 
+        // Get existing attempts for this student and game
+        List<Attempt> existingAttempts = attemptRepository.findByStudentIdAndClassroomGameId(studentIdLong, assignedGameIdLong);
+        
+        // Find the highest score among existing attempts
+        int highestScore = existingAttempts.stream()
+                .mapToInt(Attempt::getScore)
+                .max()
+                .orElse(0);
+
+        // Validate that the new score doesn't exceed the game's max score
+        if (attemptDto.getScore() > game.getMaxScore()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Score cannot exceed the maximum score of " + game.getMaxScore());
+        }
+
+        // Create and save the new attempt
         Attempt attempt = new Attempt();
         attempt.setStudent(student);
         attempt.setGame(game);
-        attempt.setClassroomGame(classroomGame); // Linking attempt to the specific assignment
-
+        attempt.setClassroomGame(classroomGame);
         attempt.setScore(attemptDto.getScore());
 
+        // Calculate EXP reward
         if (attemptDto.getExpGained() != null) {
             attempt.setExpReward(attemptDto.getExpGained());
         } else {
@@ -90,9 +107,10 @@ public class AttemptService {
             attempt.setExpReward(Math.max(0, (int) (scoreRatio * gameMaxExp)));
         }
 
-        // Update classroom-specific score if this is a classroom game
-        if (classroomGame != null) {
-            ClassroomScore score = classroomScoreRepository
+        // Only update classroom score and student EXP if this is a new highest score
+        if (attemptDto.getScore() > highestScore) {
+            // Get or create classroom score
+            ClassroomScore classroomScore = classroomScoreRepository
                     .findByClassroomAndStudent(classroomGame.getClassroom(), student)
                     .orElseGet(() -> {
                         ClassroomScore newScore = new ClassroomScore();
@@ -101,22 +119,27 @@ public class AttemptService {
                         newScore.setTotalScore(0);
                         return newScore;
                     });
-            
-            score.addScore(attemptDto.getScore());
-            classroomScoreRepository.save(score);
+
+            // Update classroom score
+            int scoreDifference = attemptDto.getScore() - highestScore;
+            classroomScore.setTotalScore(classroomScore.getTotalScore() + scoreDifference);
+            classroomScoreRepository.save(classroomScore);
+
+            // Update student's EXP
+            student.setExpAmount(student.getExpAmount() + attempt.getExpReward());
+            studentRepository.save(student);
+        } else {
+            // For lower scores, set EXP reward to 0
+            attempt.setExpReward(0);
         }
 
-        // Update global exp
-        student.setExpAmount(student.getExpAmount() + attempt.getExpReward());
-        studentRepository.save(student);
-
+        // Set attempt timing
         if (attemptDto.getTimeTakenSeconds() != null) {
             attempt.setTimeTaken(attemptDto.getTimeTakenSeconds());
         } else {
             attempt.setTimeTaken(0);
         }
-
-        attempt.setTimeStarted(LocalDateTime.now()); // Consider if client should send this
+        attempt.setTimeStarted(LocalDateTime.now());
         attempt.setTimeFinished(LocalDateTime.now());
 
         return attemptRepository.save(attempt);
